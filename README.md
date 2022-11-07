@@ -21,4 +21,4 @@ Finally, and also **optionally** edit the `Makefile` and select your preferred p
 key algorithm by commenting-out all of the `KEYCOMMAND=` lines expept for the one
 you want.
 
-Happy
+Happy X.509'ing.
