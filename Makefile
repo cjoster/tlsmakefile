@@ -32,6 +32,8 @@ else
 .PHONY: all csr _csr _csr_disp selfsigned self-signed clean key rekey destroy
 all: csr 
 
+self-signed: selfsigned
+
 selfsigned: _csr
 	@[ -f "$(CRTFILE)" ] && echo "Certificate \"$(CRTFILE)\" exists. Not overwriting." || { openssl req -x509 -in "$(CSRFILE)" -copy_extensions copy -key $(KEYFILE) \
 		-set_serial 0 -addext "basicConstraints = critical, CA:true, pathlen:0" -out "$(CRTFILE)" && \
