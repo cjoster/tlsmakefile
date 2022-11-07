@@ -27,13 +27,16 @@ ifeq ($(strip $(ENDPOINT)),)
 err:
 	@echo "*** ERROR *** Please set the DNS.1 subject alternative name in \"config\", or alternatively, the ENDPOINT variable at the top of Makefile."; exit 1
 else
+
+.PHONY: all csr selfsigned clean key rekey destroy
 all: csr 
+
+selfsigned: csr
 
 csr: key
 	@[ -s "$(CSRFILE)" ] || openssl req -new -key "$(KEYFILE)" -config config -batch -out "$(CSRFILE)" || { rm -f "$(CSRFILE)"; echo "*** FATAL *** CSR not created."; exit 1; }
 	@openssl req -in "$(CSRFILE)" -text
 
-.PHONY: key
 ifndef KEYCOMMAND
 key:
 	@echo "*** ERROR *** Please uncomment one of the KEYCOMMAND directives in Makefile to use this."; exit 1
@@ -44,10 +47,11 @@ key:
 		{ echo "Key not created successfully. Bailing out."; rm -f "$(KEYFILE)"; exit 1;}; } 
 endif
 
-.PHONY: clean
 clean:
-	rm -f *.csr *.key
+	rm -f *.csr
 
-.PHONY: rekey
-rekey: clean key csr
+destroy: clean
+	rm -f *.key *.crt
+
+rekey: destroy csr
 endif
