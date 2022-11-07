@@ -14,6 +14,7 @@ KEYCOMMAND=openssl ecparam -name prime256v1 -genkey | openssl ec 2>/dev/null	# E
 # what you are doing.
 KEYFILE=$(ENDPOINT).key
 CSRFILE=$(ENDPOINT).csr
+CRTFILE=$(ENDPOINT).crt
 
 # If ENDPOINT is not defined or otherwise empty, parse out the DNS.1subjectAltName from the config file
 ifeq ($(strip $(ENDPOINT)),)
@@ -28,13 +29,22 @@ err:
 	@echo "*** ERROR *** Please set the DNS.1 subject alternative name in \"config\", or alternatively, the ENDPOINT variable at the top of Makefile."; exit 1
 else
 
-.PHONY: all csr selfsigned clean key rekey destroy
+.PHONY: all csr _csr _csr_disp selfsigned self-signed clean key rekey destroy
 all: csr 
 
-selfsigned: csr
+selfsigned: _csr
+	@[ -f "$(CRTFILE)" ] && echo "Certificate \"$(CRTFILE)\" exists. Not overwriting." || { openssl req -x509 -in "$(CSRFILE)" -copy_extensions copy -key $(KEYFILE) \
+		-set_serial 0 -addext "basicConstraints = critical, CA:true, pathlen:0" -out "$(CRTFILE)" && \
+		{ echo "Certificate created and saved as \"$(CRTFILE)\""; } || \
+		{ echo "*** Certificate not created ***"; exit 1; }; }
+	@openssl x509 -in "$(CRTFILE)" -text
 
-csr: key
+csr: _csr _csr_disp
+
+_csr: key
 	@[ -s "$(CSRFILE)" ] || openssl req -new -key "$(KEYFILE)" -config config -batch -out "$(CSRFILE)" || { rm -f "$(CSRFILE)"; echo "*** FATAL *** CSR not created."; exit 1; }
+
+_csr_disp:
 	@openssl req -in "$(CSRFILE)" -text
 
 ifndef KEYCOMMAND
