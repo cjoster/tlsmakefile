@@ -1,0 +1,69 @@
+[ subjectAlternativeNames ]
+# **** AT A MINMUM THIS HOSTNAME (DNS) MUST BE SET ****
+  DNS   = www.myserver.com
+# DNS.1 = foo.bar.com       # If you need more, just suffix them like this.
+# DNS.2 = mail.myserver.com # These are examples and can safely be deleted.
+# DNS.3 = *.otherserver.com # Wildcard example
+#
+# IP addresses are frowned upon in certs, but some like to do it
+# the problem is they sometimes get put in as DNS entries. This
+#
+# is the proper way to put an IP address in a CSR/Cert
+# IP   = 1.2.3.4              # IP address example
+# IP.1 = 2.3.4.5              # IP address example
+
+[ req ]
+distinguished_name              = req_dn
+default_md                      = sha256
+req_extensions		              = req_ext
+
+[ req_dn ]
+countryName                     = Country Name (2 letter code)
+stateOrProvinceName             = State or Province Name
+localityName                    = Locality Name
+0.organizationName              = Organization Name
+organizationalUnitName          = Organizational Unit Name
+# commonName is deprecated
+commonName                      = Common Name (e.g. your hostname)
+
+countryName_default             = US
+stateOrProvinceName_default     = California
+localityName_default            = Palo Alto
+0.organizationName_default      = VMware, Inc
+organizationalUnitName_default  = Tanzu Labs
+# You can uncomment this line if you want the DNS entry from
+# subjectAlternativeName to populate into commonName (CN)
+# commonName_default              = ${subjectAlternativeNames::DNS}
+
+[ req_ext ]
+# A critical extension means that the requester or certificate authority
+# has requested that any entity that is attempting to verify the certificate
+# must understand and implement the extension or must fail verification
+basicConstraints 	              = critical, CA:false
+
+# Key Usage:
+#
+# Values defined are:
+# digitalSignature, nonRepudiation, keyEncipherment, dataEncipherment, 
+# keyAgreement, keyCertSign, cRLSign, encipherOnly, and decipherOnly
+keyUsage	                      = digitalSignature, keyEncipherment
+
+# Extended Key Usage:
+#
+# Value                  Meaning according to RFC 5280 etc.
+# -----                  ----------------------------------
+# serverAuth             SSL/TLS WWW Server Authentication
+# clientAuth             SSL/TLS WWW Client Authentication
+# codeSigning            Code Signing
+# emailProtection        E-mail Protection (S/MIME)
+# timeStamping           Trusted Timestamping
+# OCSPSigning            OCSP Signing
+# ipsecIKE               ipsec Internet Key Exchange
+# msCodeInd              Microsoft Individual Code Signing (authenticode)
+# msCodeCom              Microsoft Commercial Code Signing (authenticode)
+# msCTLSign              Microsoft Trust List Signing
+# msEFS                  Microsoft Encrypted File System
+extendedKeyUsage 	              = serverAuth, clientAuth
+
+subjectKeyIdentifier            = hash
+subjectAltName                  = @subjectAlternativeNames
